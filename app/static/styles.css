@@ -609,12 +609,16 @@ body {
 }
 
 .block-dimensions {
+  position: absolute;
+  top: 5px;
+  right: 5px;
   padding: 1px 5px;
   border-radius: 4px;
   background: oklch(0% 0 0 / 0.34);
   font-size: 0.72rem;
   font-weight: 800;
   line-height: 1.2;
+  z-index: 2;
 }
 
 .block-layer-control {

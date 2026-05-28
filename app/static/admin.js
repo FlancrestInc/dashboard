@@ -34,6 +34,7 @@ tabs.forEach((tab) => {
   tab.addEventListener("click", () => {
     tabs.forEach((item) => item.classList.toggle("active", item === tab));
     panels.forEach((panel) => panel.classList.toggle("active", panel.dataset.tabPanel === tab.dataset.tab));
+    requestAnimationFrame(updateAllBlockDimensions);
   });
 });
 
@@ -106,6 +107,11 @@ document.addEventListener("click", (event) => {
 
 if (addPhotoBlock) addPhotoBlock.addEventListener("click", () => addManagedBlock("photos"));
 if (addCameraBlock) addCameraBlock.addEventListener("click", () => addManagedBlock("frigate"));
+if (builder && typeof ResizeObserver !== "undefined") {
+  const builderResizeObserver = new ResizeObserver(() => requestAnimationFrame(updateAllBlockDimensions));
+  builderResizeObserver.observe(builder);
+}
+if (builder) window.addEventListener("resize", () => requestAnimationFrame(updateAllBlockDimensions));
 
 syncDisplayShape();
 blockToggles.forEach((toggle) => syncBlockVisibility(toggle.dataset.blockToggle, toggle.checked));
@@ -353,6 +359,7 @@ function updateBlockDimensions(block, rect) {
   const dimensions = block.querySelector(".block-dimensions");
   if (!dimensions) return;
   const bounds = builder.getBoundingClientRect();
+  if (!bounds.width || !bounds.height) return;
   const widthUnits = Math.max(1, Math.round(((rect.w / 100) * bounds.width) / GRID_PIXEL_SIZE));
   const heightUnits = Math.max(1, Math.round(((rect.h / 100) * bounds.height) / GRID_PIXEL_SIZE));
   dimensions.textContent = `${widthUnits} x ${heightUnits}`;

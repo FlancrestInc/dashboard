@@ -36,6 +36,14 @@ def test_layout_builder_has_full_resize_handles_dimensions_layers_and_saved_layo
     assert 'name="layout_action" value="save_new"' in template
 
 
+def test_layout_builder_updates_dimensions_after_builder_is_measured():
+    script = Path("app/static/admin.js").read_text()
+
+    assert "ResizeObserver" in script
+    assert "requestAnimationFrame(updateAllBlockDimensions)" in script
+    assert "if (!bounds.width || !bounds.height) return;" in script
+
+
 def test_photo_rotation_preloads_images_before_crossfading():
     script = Path("app/static/display.js").read_text()
 

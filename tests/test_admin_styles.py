@@ -27,3 +27,12 @@ def test_camera_panels_use_minimal_bezels_and_labels():
     assert ".camera-panel h2" in styles
     assert "margin: 0 0 clamp(4px, 0.9cqh, 8px);" in styles
     assert "font-size: clamp(0.62rem, min(2.8cqw, 2.6cqh), 0.82rem);" in styles
+
+
+def test_builder_block_dimension_badge_stays_clear_of_layer_picker():
+    styles = Path("app/static/styles.css").read_text()
+
+    assert ".block-dimensions {" in styles
+    assert "top: 5px;" in styles
+    assert ".block-layer-control {" in styles
+    assert "bottom: 5px;" in styles
