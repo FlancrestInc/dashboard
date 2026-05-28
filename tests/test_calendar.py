@@ -24,6 +24,42 @@ END:VCALENDAR
     assert events[0]["end_time"]
 
 
+def test_parse_ics_events_excludes_past_events_but_keeps_ongoing_events():
+    now = datetime.now(timezone.utc)
+    past_start = now - timedelta(hours=3)
+    past_end = now - timedelta(hours=2)
+    ongoing_start = now - timedelta(hours=1)
+    ongoing_end = now + timedelta(hours=1)
+    future_start = now + timedelta(hours=2)
+    future_end = now + timedelta(hours=3)
+    ics = f"""BEGIN:VCALENDAR
+VERSION:2.0
+BEGIN:VEVENT
+UID:past
+DTSTART:{past_start.strftime("%Y%m%dT%H%M%SZ")}
+DTEND:{past_end.strftime("%Y%m%dT%H%M%SZ")}
+SUMMARY:Already done
+END:VEVENT
+BEGIN:VEVENT
+UID:ongoing
+DTSTART:{ongoing_start.strftime("%Y%m%dT%H%M%SZ")}
+DTEND:{ongoing_end.strftime("%Y%m%dT%H%M%SZ")}
+SUMMARY:Happening now
+END:VEVENT
+BEGIN:VEVENT
+UID:future
+DTSTART:{future_start.strftime("%Y%m%dT%H%M%SZ")}
+DTEND:{future_end.strftime("%Y%m%dT%H%M%SZ")}
+SUMMARY:Coming up
+END:VEVENT
+END:VCALENDAR
+"""
+
+    events = parse_ics_events(ics, max_events=5)
+
+    assert [event["title"] for event in events] == ["Happening now", "Coming up"]
+
+
 def test_parse_ics_events_handles_google_until_with_timezone_aware_start():
     start = datetime.now(timezone.utc) + timedelta(days=7)
     start_text = start.strftime("%Y%m%dT090000")

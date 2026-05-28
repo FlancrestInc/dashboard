@@ -108,18 +108,30 @@ body {
   text-transform: uppercase;
 }
 
+.clock-panel {
+  justify-content: flex-start;
+  gap: clamp(4px, 1.6cqh, 12px);
+}
+
+.clock-panel .kicker {
+  margin: 0;
+  font-size: clamp(0.62rem, min(18cqw, 16cqh), 0.95rem);
+  line-height: 1;
+}
+
 .clock-time {
   margin: 0;
-  font-size: clamp(1.8rem, min(28cqw, 46cqh), 7.5rem);
+  font-size: clamp(1.8rem, min(28cqw, 30cqh), 7.5rem);
   line-height: 0.9;
   font-weight: 800;
 }
 
 .date-line {
-  margin: var(--space-lg) 0 0;
+  margin: 0;
   color: var(--muted);
-  font-size: clamp(1.15rem, 2vw, 2rem);
+  font-size: clamp(0.9rem, min(9cqw, 12cqh), 2rem);
   font-weight: 600;
+  line-height: 1.05;
 }
 
 .display-grid {
@@ -255,6 +267,14 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  padding: clamp(4px, min(1.2cqw, 1.4cqh), 10px);
+}
+
+.camera-panel h2 {
+  margin: 0 0 clamp(4px, 0.9cqh, 8px);
+  font-size: clamp(0.62rem, min(2.8cqw, 2.6cqh), 0.82rem);
+  line-height: 1;
+  letter-spacing: 0.08em;
 }
 
 [data-camera-block],
@@ -273,7 +293,7 @@ body {
   height: 100%;
   min-height: 0;
   border: 0;
-  border-radius: 6px;
+  border-radius: 4px;
   background: var(--surface-strong);
   object-fit: cover;
 }

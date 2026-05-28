@@ -60,21 +60,27 @@ def parse_ics_events(
         dtstart = _to_datetime(component.decoded("dtstart"))
         dtend = _optional_datetime(component, "dtend")
         rrule = component.get("rrule")
+        duration = (dtend - dtstart) if dtend else timedelta(days=1) if all_day else None
 
         starts = [dtstart]
         if rrule:
+            window_start = now - duration if duration else now
             rrule_text = _normalize_rrule_until(rrule.to_ical().decode(), dtstart)
             starts = list(
                 rrulestr(rrule_text, dtstart=dtstart).between(
-                    now - timedelta(days=1), horizon, inc=True
+                    window_start, horizon, inc=True
                 )
             )
 
-        duration = (dtend - dtstart) if dtend else None
         for start in starts:
-            if start < now - timedelta(days=1) or start > horizon:
+            if start > horizon:
                 continue
             end = start + duration if duration else None
+            if end:
+                if end <= now:
+                    continue
+            elif start < now:
+                continue
             start_display = start.astimezone(display_tz)
             end_display = end.astimezone(display_tz) if end else None
             events.append(
