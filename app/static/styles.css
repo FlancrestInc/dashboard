@@ -2,15 +2,19 @@
   --ink: oklch(96% 0.02 92);
   --muted: oklch(78% 0.03 88);
   --dim: oklch(62% 0.03 88);
-  --surface: oklch(19% 0.025 210 / 0.78);
-  --surface-strong: oklch(15% 0.025 210 / 0.92);
-  --line: oklch(100% 0 0 / 0.16);
+  --surface: oklch(14% 0.018 96 / 0.54);
+  --surface-soft: oklch(100% 0 0 / 0.09);
+  --surface-strong: oklch(12% 0.018 96 / 0.78);
+  --line: oklch(100% 0 0 / 0.18);
   --accent: oklch(79% 0.14 78);
   --danger: oklch(71% 0.16 28);
-  --admin-ink: oklch(20% 0.025 245);
-  --admin-muted: oklch(45% 0.035 245);
-  --admin-bg: oklch(96% 0.014 82);
-  --admin-card: oklch(99% 0.007 82);
+  --admin-ink: oklch(96% 0.018 92);
+  --admin-muted: oklch(76% 0.025 92);
+  --admin-dim: oklch(60% 0.025 92);
+  --admin-bg: oklch(13% 0.024 112);
+  --admin-card: oklch(18% 0.02 112 / 0.72);
+  --admin-field: oklch(96% 0.012 92);
+  --admin-field-ink: oklch(18% 0.018 112);
   --space-xs: 4px;
   --space-sm: 8px;
   --space-md: 12px;
@@ -38,8 +42,8 @@ body {
   min-height: 100vh;
   overflow: hidden;
   background:
-    radial-gradient(circle at 78% 16%, oklch(54% 0.06 174 / 0.28), transparent 34rem),
-    linear-gradient(135deg, oklch(14% 0.035 222), oklch(21% 0.04 164));
+    radial-gradient(circle at 18% 82%, oklch(57% 0.075 102 / 0.16), transparent 30rem),
+    linear-gradient(135deg, oklch(11% 0.024 112), oklch(18% 0.026 142));
   color: var(--ink);
 }
 
@@ -65,8 +69,8 @@ body {
 
 .background-layer.empty {
   background:
-    radial-gradient(circle at 88% 18%, oklch(73% 0.12 78 / 0.18), transparent 28rem),
-    linear-gradient(140deg, oklch(13% 0.032 220), oklch(24% 0.045 166));
+    radial-gradient(circle at 18% 78%, oklch(72% 0.11 78 / 0.16), transparent 28rem),
+    linear-gradient(140deg, oklch(12% 0.024 112), oklch(22% 0.034 138));
 }
 
 .background-layer__image {
@@ -151,11 +155,11 @@ body {
 
 .panel,
 .weather-block {
-  border: 1px solid var(--line);
+  border: 0;
   border-radius: 8px;
   background: var(--surface);
-  box-shadow: 0 24px 80px oklch(0% 0 0 / 0.24);
-  backdrop-filter: blur(16px);
+  box-shadow: 0 18px 60px oklch(0% 0 0 / 0.2);
+  backdrop-filter: blur(10px);
 }
 
 .panel {
@@ -170,46 +174,103 @@ body {
   letter-spacing: 0.08em;
 }
 
-.agenda-list {
+.agenda-list,
+.agenda-day,
+.agenda-day__events {
   display: grid;
-  gap: clamp(8px, 1.2vw, 16px);
+  gap: clamp(8px, 1.5cqh, 16px);
+}
+
+.agenda-list,
+.agenda-day__events {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-.agenda-list li {
-  display: grid;
-  grid-template-columns: minmax(5rem, 8rem) 1fr;
-  gap: clamp(8px, 1.2vw, 16px);
+.agenda-day {
+  align-content: start;
+}
+
+.agenda-day + .agenda-day {
+  margin-top: clamp(8px, 2.4cqh, 24px);
+}
+
+.agenda-day__header {
+  display: flex;
   align-items: baseline;
-  padding-bottom: clamp(8px, 1.2vw, 16px);
-  border-bottom: 1px solid var(--line);
+  gap: clamp(8px, 1.8cqw, 18px);
+  padding-top: clamp(2px, 0.8cqh, 8px);
+  border-top: 1px solid oklch(100% 0 0 / 0.12);
 }
 
-.agenda-list strong {
-  display: block;
-  font-size: clamp(1rem, 1.6vw, 1.65rem);
-  line-height: 1.12;
+.agenda-day:first-child .agenda-day__header {
+  border-top: 0;
+  padding-top: 0;
 }
 
-.agenda-list span,
-.event-date {
-  display: block;
+.agenda-day__number {
+  min-width: 1.65em;
+  font-size: clamp(1.45rem, min(8cqw, 7.5cqh), 3rem);
+  font-weight: 300;
+  line-height: 0.95;
+}
+
+.agenda-day__label {
+  color: var(--ink);
+  font-size: clamp(1rem, min(3.4cqw, 4cqh), 1.5rem);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.agenda-event {
+  display: grid;
+  grid-template-columns: minmax(3.6rem, 36%) minmax(0, 1fr);
+  gap: clamp(8px, 1.4cqw, 20px);
+  align-items: baseline;
+  min-height: clamp(38px, 6cqh, 72px);
+  padding: clamp(7px, 1.1cqh, 12px) clamp(10px, 1.8cqw, 18px);
+  border-left: clamp(4px, 0.6cqw, 6px) solid oklch(100% 0 0 / 0.18);
+  border-radius: 4px;
+  background: var(--surface-soft);
+}
+
+.agenda-event__time {
   color: var(--muted);
-  font-size: clamp(0.86rem, 1vw, 1.1rem);
-  margin-top: var(--space-sm);
+  font-size: clamp(0.78rem, min(3cqw, 3.4cqh), 1.2rem);
+  font-weight: 800;
+  line-height: 1.05;
 }
 
-.event-date {
-  margin-top: 0;
-  color: var(--accent);
+.agenda-event__body {
+  min-width: 0;
+}
+
+.agenda-event strong {
+  display: block;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: clamp(1rem, min(3.6cqw, 4cqh), 1.45rem);
   font-weight: 800;
+  line-height: 1.12;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.agenda-event span {
+  display: block;
+  margin-top: 2px;
+  overflow: hidden;
+  color: var(--dim);
+  font-size: clamp(0.82rem, min(2.8cqw, 3cqh), 1.1rem);
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .weather-block {
-  justify-content: center;
-  padding: clamp(8px, min(3.5cqw, 4cqh), 24px);
+  justify-content: end;
+  padding: clamp(8px, min(2.5cqw, 3cqh), 18px);
 }
 
 .weather-block p,
@@ -218,49 +279,67 @@ body {
   color: var(--muted);
 }
 
-.weather-block .temp {
-  margin: var(--space-xs) 0;
-  font-size: clamp(1.4rem, min(20cqw, 28cqh), 4.5rem);
-  line-height: 0.95;
-  font-weight: 800;
+.weather-forecast-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(54px, 1fr));
+  gap: clamp(6px, 1.5cqw, 14px);
+  width: 100%;
 }
 
-.weather-block strong {
-  display: block;
-  font-size: clamp(0.8rem, min(5cqw, 5cqh), 1.3rem);
-  margin-bottom: var(--space-xs);
-}
-
-.weather-current {
-  display: flex;
-  align-items: center;
-  gap: clamp(8px, 3cqw, 18px);
+.weather-day-card {
+  display: grid;
+  justify-items: center;
   min-width: 0;
+  padding: clamp(4px, 1cqh, 8px) clamp(4px, 1cqw, 8px);
+  border-radius: 7px;
+  background: oklch(100% 0 0 / 0.1);
+  text-align: center;
 }
 
-.weather-icon {
-  flex: 0 0 auto;
-  color: var(--accent);
-  font-size: clamp(1.4rem, min(14cqw, 18cqh), 4rem);
+.weather-day-card__label {
+  width: 100%;
+  padding: 2px 5px;
+  border-radius: 999px;
+  background: oklch(100% 0 0 / 0.18);
+  color: var(--ink);
+  font-size: clamp(0.68rem, min(2.8cqw, 3cqh), 0.9rem);
+  font-weight: 800;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.weather-day-card__icon {
+  margin-top: clamp(4px, 1.2cqh, 10px);
+  color: var(--ink);
+  font-size: clamp(1.5rem, min(8cqw, 10cqh), 3rem);
   line-height: 1;
 }
 
-.forecast {
+.weather-day-card__temps {
   display: flex;
-  gap: clamp(4px, 1.4cqw, 12px);
-  flex-wrap: wrap;
-  margin-top: clamp(6px, 3cqh, 16px);
+  gap: 0.45em;
+  align-items: baseline;
+  justify-content: center;
+  margin-top: clamp(2px, 0.8cqh, 6px);
+  color: var(--ink);
+  font-size: clamp(0.85rem, min(3.6cqw, 3.8cqh), 1.12rem);
+  line-height: 1;
 }
 
-.forecast span {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35em;
-  padding: clamp(4px, 1.2cqh, 8px) clamp(6px, 1.8cqw, 12px);
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  font-size: clamp(0.72rem, min(3.8cqw, 3.8cqh), 1rem);
-  line-height: 1.1;
+.weather-day-card__temps strong {
+  color: var(--ink);
+  font-size: 1.1em;
+}
+
+.weather-day-card__condition {
+  max-width: 100%;
+  margin-top: 4px;
+  overflow: hidden;
+  color: var(--dim);
+  font-size: clamp(0.62rem, min(2.2cqw, 2.4cqh), 0.78rem);
+  line-height: 1.05;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .camera-panel {
@@ -365,7 +444,10 @@ body {
 
 .admin-body {
   min-height: 100vh;
-  background: var(--admin-bg);
+  background:
+    radial-gradient(circle at 12% 8%, oklch(58% 0.08 92 / 0.16), transparent 30rem),
+    radial-gradient(circle at 90% 18%, oklch(45% 0.06 145 / 0.14), transparent 28rem),
+    linear-gradient(140deg, oklch(11% 0.022 112), var(--admin-bg));
   color: var(--admin-ink);
 }
 
@@ -394,6 +476,8 @@ body {
   justify-content: space-between;
   align-items: center;
   margin-bottom: var(--space-2xl);
+  padding-bottom: var(--space-lg);
+  border-bottom: 1px solid oklch(100% 0 0 / 0.12);
 }
 
 .admin-header h1,
@@ -421,9 +505,10 @@ body {
   flex-wrap: wrap;
   gap: var(--space-sm);
   padding: var(--space-sm);
-  border: 1px solid oklch(82% 0.025 82);
+  border: 1px solid oklch(100% 0 0 / 0.12);
   border-radius: 8px;
-  background: oklch(93% 0.018 82);
+  background: oklch(100% 0 0 / 0.08);
+  backdrop-filter: blur(12px);
 }
 
 .tab-button {
@@ -434,9 +519,9 @@ body {
 }
 
 .tab-button.active {
-  background: var(--admin-card);
+  background: oklch(100% 0 0 / 0.16);
   color: var(--admin-ink);
-  box-shadow: 0 8px 20px oklch(35% 0.04 82 / 0.08);
+  box-shadow: 0 8px 24px oklch(0% 0 0 / 0.16);
 }
 
 .tab-panel {
@@ -451,10 +536,11 @@ body {
 .login-panel {
   gap: var(--space-lg);
   padding: var(--space-xl);
-  border: 1px solid oklch(82% 0.025 82);
+  border: 1px solid oklch(100% 0 0 / 0.12);
   border-radius: 8px;
   background: var(--admin-card);
-  box-shadow: 0 16px 48px oklch(35% 0.04 82 / 0.08);
+  box-shadow: 0 18px 54px oklch(0% 0 0 / 0.18);
+  backdrop-filter: blur(14px);
 }
 
 .settings-form h2 {
@@ -490,13 +576,13 @@ body {
   aspect-ratio: var(--builder-aspect);
   max-height: 62vh;
   justify-self: center;
-  border: 1px solid oklch(72% 0.03 82);
+  border: 1px solid oklch(100% 0 0 / 0.14);
   border-radius: 8px;
   overflow: hidden;
   background:
-    linear-gradient(oklch(25% 0.02 220 / 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, oklch(25% 0.02 220 / 0.08) 1px, transparent 1px),
-    oklch(98% 0.008 82);
+    linear-gradient(oklch(100% 0 0 / 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(100% 0 0 / 0.08) 1px, transparent 1px),
+    oklch(9% 0.018 112 / 0.72);
   background-size: var(--builder-grid-size) var(--builder-grid-size);
 }
 
@@ -507,10 +593,10 @@ body {
   gap: 2px;
   min-width: 48px;
   min-height: 38px;
-  border: 1px solid oklch(45% 0.06 162);
+  border: 1px solid oklch(100% 0 0 / 0.2);
   border-radius: 6px;
-  background: oklch(85% 0.055 162 / 0.78);
-  color: oklch(22% 0.055 162);
+  background: oklch(100% 0 0 / 0.16);
+  color: var(--admin-ink);
   font-weight: 800;
   cursor: grab;
   touch-action: none;
@@ -525,7 +611,7 @@ body {
 .block-dimensions {
   padding: 1px 5px;
   border-radius: 4px;
-  background: oklch(100% 0 0 / 0.68);
+  background: oklch(0% 0 0 / 0.34);
   font-size: 0.72rem;
   font-weight: 800;
   line-height: 1.2;
@@ -672,8 +758,9 @@ body {
   min-width: 0;
   margin: 0;
   padding: var(--space-xl);
-  border: 1px solid oklch(82% 0.025 82);
+  border: 1px solid oklch(100% 0 0 / 0.12);
   border-radius: 8px;
+  background: oklch(100% 0 0 / 0.06);
 }
 
 .block-config legend {
@@ -720,9 +807,9 @@ input[type="checkbox"] {
   min-height: 44px;
   margin: 0;
   padding: 0;
-  border: 1px solid oklch(78% 0.025 82);
+  border: 1px solid oklch(100% 0 0 / 0.22);
   border-radius: 4px;
-  background: white;
+  background: oklch(100% 0 0 / 0.12);
   cursor: pointer;
 }
 
@@ -737,8 +824,8 @@ input[type="checkbox"]::before {
 }
 
 input[type="checkbox"]:checked {
-  border-color: oklch(62% 0.18 255);
-  background: oklch(62% 0.18 255);
+  border-color: var(--accent);
+  background: var(--accent);
 }
 
 input[type="checkbox"]:checked::before {
@@ -761,28 +848,31 @@ button {
 input,
 select {
   width: 100%;
-  border: 1px solid oklch(78% 0.025 82);
+  border: 1px solid oklch(100% 0 0 / 0.24);
   padding: 0 var(--space-md);
-  background: white;
-  color: var(--admin-ink);
+  background: var(--admin-field);
+  color: var(--admin-field-ink);
 }
 
 button,
 .save {
   border: 0;
   padding: 0 var(--space-xl);
-  background: oklch(31% 0.06 162);
-  color: oklch(98% 0.01 82);
+  background: oklch(100% 0 0 / 0.18);
+  color: var(--admin-ink);
   font-weight: 800;
   cursor: pointer;
 }
 
 button.secondary {
-  background: oklch(90% 0.025 82);
+  border: 1px solid oklch(100% 0 0 / 0.16);
+  background: oklch(100% 0 0 / 0.1);
   color: var(--admin-ink);
 }
 
 .save {
+  background: var(--accent);
+  color: oklch(18% 0.018 92);
   justify-self: start;
 }
 
@@ -825,7 +915,7 @@ code {
     grid-template-columns: 1fr;
   }
 
-  .agenda-list li {
+  .agenda-event {
     grid-template-columns: 1fr;
     gap: var(--space-sm);
   }

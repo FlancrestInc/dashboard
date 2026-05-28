@@ -20,6 +20,9 @@ END:VCALENDAR
 
     assert events[0]["title"] == "Dentist"
     assert events[0]["date"]
+    assert events[0]["date_key"] == start.date().isoformat()
+    assert events[0]["date_day"] == start.strftime("%d")
+    assert events[0]["date_label"]
     assert events[0]["start_time"]
     assert events[0]["end_time"]
 

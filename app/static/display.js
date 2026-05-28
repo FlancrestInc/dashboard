@@ -42,15 +42,51 @@ function renderAgendaBlocks(calendar) {
       agendaBlock.innerHTML = `<div class="placeholder">No upcoming events found.</div>`;
       return;
     }
-    agendaBlock.innerHTML = `<ol class="agenda-list">${calendar.events
-      .map((event) => {
-        const time = event.all_day === "true" ? "All day" : [event.start_time, event.end_time].filter(Boolean).join(" - ");
-        return `<li><div class="event-date">${escapeHtml(event.date)}</div><div><strong>${escapeHtml(
-          event.title,
-        )}</strong><span>${escapeHtml(time)}</span></div></li>`;
-      })
-      .join("")}</ol>`;
+    agendaBlock.innerHTML = `<div class="agenda-list">${groupEventsByDate(calendar.events)
+      .map(
+        (group) => `
+          <section class="agenda-day">
+            <header class="agenda-day__header">
+              <span class="agenda-day__number">${escapeHtml(group.day)}</span>
+              <span class="agenda-day__label">${escapeHtml(group.label)}</span>
+            </header>
+            <ol class="agenda-day__events">
+              ${group.events.map(renderAgendaEvent).join("")}
+            </ol>
+          </section>`,
+      )
+      .join("")}</div>`;
   });
+}
+
+function groupEventsByDate(events) {
+  return events.reduce((groups, event) => {
+    const key = event.date_key || event.date;
+    let group = groups.find((item) => item.key === key);
+    if (!group) {
+      group = {
+        key,
+        day: event.date_day || event.date || "",
+        label: event.date_label || event.date || "",
+        events: [],
+      };
+      groups.push(group);
+    }
+    group.events.push(event);
+    return groups;
+  }, []);
+}
+
+function renderAgendaEvent(event) {
+  const start = event.all_day === "true" ? "All day" : event.start_time || "";
+  const secondary = event.all_day === "true" ? "" : event.end_time || "";
+  return `<li class="agenda-event">
+    <time class="agenda-event__time">${escapeHtml(start)}</time>
+    <div class="agenda-event__body">
+      <strong>${escapeHtml(event.title)}</strong>
+      ${secondary ? `<span>${escapeHtml(secondary)}</span>` : ""}
+    </div>
+  </li>`;
 }
 
 function renderWeatherBlocks(weather) {
@@ -67,25 +103,33 @@ function renderWeatherBlocks(weather) {
     const settings = block && block.settings ? block.settings : {};
     const days = Math.max(1, Math.min(7, Number(settings.forecast_days || state.data.settings.weather.forecast_days || 4)));
     const showIcons = settings.show_icons !== false;
-    const current = weather.current;
+    const forecast = weather.forecast && weather.forecast.length ? weather.forecast.slice(0, days) : [forecastFromCurrent(weather.current)];
     weatherBlock.innerHTML = `
       ${block && block.show_label ? `<p class="block-label">${escapeHtml(block.label)}</p>` : ""}
-      <div class="weather-current">
-        ${showIcons ? `<span class="weather-icon" aria-hidden="true">${weatherIcon(current.icon)}</span>` : ""}
-        <div>
-          <div class="temp">${current.temperature}${escapeHtml(current.unit)}</div>
-          <strong>${escapeHtml(current.condition)}</strong>
-          <span>Feels like ${current.feels_like}${escapeHtml(current.unit)}</span>
-        </div>
-      </div>
-      <div class="forecast">${weather.forecast
-        .slice(1, days)
-        .map(
-          (day) =>
-            `<span>${showIcons ? `<i aria-hidden="true">${weatherIcon(day.icon)}</i>` : ""}${formatShortDay(day.date)} ${day.high}/${day.low}${escapeHtml(day.unit)}</span>`,
-        )
+      <div class="weather-forecast-strip">${forecast
+        .map((day, index) => renderWeatherDay(day, index, showIcons))
         .join("")}</div>`;
   });
+}
+
+function forecastFromCurrent(current) {
+  return {
+    date: new Date().toISOString().slice(0, 10),
+    condition: current.condition,
+    icon: current.icon,
+    high: current.temperature,
+    low: current.feels_like,
+    unit: current.unit,
+  };
+}
+
+function renderWeatherDay(day, index, showIcons) {
+  return `<section class="weather-day-card">
+    <div class="weather-day-card__label">${escapeHtml(index === 0 ? "Today" : formatShortDay(day.date))}</div>
+    ${showIcons ? `<div class="weather-day-card__icon" aria-hidden="true">${weatherIcon(day.icon)}</div>` : ""}
+    <div class="weather-day-card__temps"><strong>${escapeHtml(day.high)}</strong><span>${escapeHtml(day.low)}</span></div>
+    <div class="weather-day-card__condition">${escapeHtml(day.condition)}</div>
+  </section>`;
 }
 
 function renderCameraBlocks(frigate) {

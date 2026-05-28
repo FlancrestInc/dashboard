@@ -83,12 +83,16 @@ def parse_ics_events(
                 continue
             start_display = start.astimezone(display_tz)
             end_display = end.astimezone(display_tz) if end else None
+            event_date = start_display.date()
             events.append(
                 (
                     start,
                     {
                         "title": summary,
                         "date": start_display.strftime("%a, %b %-d"),
+                        "date_key": event_date.isoformat(),
+                        "date_day": start_display.strftime("%d"),
+                        "date_label": _date_label(event_date, datetime.now(display_tz).date()),
                         "start_time": "" if all_day else start_display.strftime("%-I:%M %p"),
                         "end_time": "" if not end_display or all_day else end_display.strftime("%-I:%M %p"),
                         "all_day": "true" if all_day else "false",
@@ -138,3 +142,13 @@ def _zoneinfo(timezone_name: str) -> ZoneInfo:
         return ZoneInfo(timezone_name)
     except ZoneInfoNotFoundError:
         return ZoneInfo("UTC")
+
+
+def _date_label(event_date: date, today: date) -> str:
+    if event_date == today:
+        return "Today"
+    if event_date == today + timedelta(days=1):
+        return "Tomorrow"
+    if event_date.month == today.month and event_date.year == today.year:
+        return event_date.strftime("%A")
+    return event_date.strftime("%B, %A")

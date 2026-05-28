@@ -54,3 +54,17 @@ def test_photo_layers_are_stacked_and_fade_between_active_states():
     assert ".photo-frame__image" in styles
     assert ".photo-frame__image.active" in styles
     assert "transition: opacity" in styles
+
+
+def test_display_renders_grouped_agenda_and_glanceable_weather_cards():
+    script = Path("app/static/display.js").read_text()
+    styles = Path("app/static/styles.css").read_text()
+
+    assert "groupEventsByDate(" in script
+    assert "agenda-day" in script
+    assert "agenda-event" in script
+    assert "weather-forecast-strip" in script
+    assert "weather-day-card" in script
+    assert ".agenda-day" in styles
+    assert ".agenda-event" in styles
+    assert ".weather-day-card" in styles
