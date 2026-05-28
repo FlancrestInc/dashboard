@@ -323,15 +323,15 @@ function formatShortDay(raw) {
 function weatherIcon(icon) {
   return (
     {
-      sun: "☀",
-      "cloud-sun": "◐",
-      cloud: "☁",
-      "cloud-fog": "≋",
-      "cloud-drizzle": "▥",
-      "cloud-rain": "☂",
-      "cloud-snow": "✻",
-      "cloud-lightning": "⚡",
-    }[icon] || "☁"
+      sun: "☀️",
+      "cloud-sun": "🌤️",
+      cloud: "☁️",
+      "cloud-fog": "🌫️",
+      "cloud-drizzle": "🌦️",
+      "cloud-rain": "🌧️",
+      "cloud-snow": "❄️",
+      "cloud-lightning": "⛈️",
+    }[icon] || "☁️"
   );
 }
 

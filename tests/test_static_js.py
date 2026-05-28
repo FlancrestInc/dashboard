@@ -68,3 +68,12 @@ def test_display_renders_grouped_agenda_and_glanceable_weather_cards():
     assert ".agenda-day" in styles
     assert ".agenda-event" in styles
     assert ".weather-day-card" in styles
+
+
+def test_weather_icons_use_unambiguous_weather_symbols():
+    script = Path("app/static/display.js").read_text()
+
+    assert '"cloud-drizzle": "▥"' not in script
+    assert '"cloud-drizzle": "🌦️"' in script
+    assert '"cloud-rain": "🌧️"' in script
+    assert '"cloud-fog": "🌫️"' in script
