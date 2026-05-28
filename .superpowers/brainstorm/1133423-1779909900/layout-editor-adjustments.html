@@ -1,0 +1,54 @@
+<h2>Layout Editor Adjustments</h2>
+<p class="subtitle">A proposed shape for the next editor pass. Click the option that best matches the saved-layout behavior you want.</p>
+
+<div class="mockup">
+  <div class="mockup-header">Preview: Custom Layout Editor</div>
+  <div class="mockup-body">
+    <div style="display:grid;grid-template-columns:1fr 190px;gap:18px;align-items:start">
+      <div style="position:relative;aspect-ratio:16/9;border:1px solid #b8b8b8;background:
+        linear-gradient(#d6d6d6 1px, transparent 1px),
+        linear-gradient(90deg, #d6d6d6 1px, transparent 1px),
+        #fafafa;background-size:18px 18px;overflow:hidden">
+        <div style="position:absolute;left:10%;top:12%;width:34%;height:28%;z-index:2;background:#bfe8d0;border:2px solid #16804a;display:grid;place-items:center;font-weight:700;color:#12402a">
+          Clock<br><span style="font-size:12px;font-weight:600">34 x 28</span>
+          <span style="position:absolute;top:-5px;left:50%;width:22px;height:8px;transform:translateX(-50%);background:#16804a"></span>
+          <span style="position:absolute;bottom:-5px;left:50%;width:22px;height:8px;transform:translateX(-50%);background:#16804a"></span>
+          <span style="position:absolute;left:-5px;top:50%;width:8px;height:22px;transform:translateY(-50%);background:#16804a"></span>
+          <span style="position:absolute;right:-5px;top:50%;width:8px;height:22px;transform:translateY(-50%);background:#16804a"></span>
+        </div>
+        <div style="position:absolute;left:31%;top:30%;width:38%;height:42%;z-index:4;background:#c9d8ff;border:2px solid #3450a8;display:grid;place-items:center;font-weight:700;color:#182554">
+          Photos<br><span style="font-size:12px;font-weight:600">38 x 42</span>
+        </div>
+      </div>
+      <div style="display:grid;gap:10px">
+        <div class="label">Saved Layouts</div>
+        <select class="mock-input"><option>Morning board</option><option>Movie night</option></select>
+        <button class="mock-button">Load</button>
+        <button class="mock-button">Save current</button>
+        <button class="mock-button">Save as new</button>
+        <div class="label" style="margin-top:8px">Selected Block</div>
+        <input class="mock-input" value="Layer 4">
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Saved-layout behavior</h3>
+  <div class="options">
+    <div class="option" data-choice="recommended" onclick="toggleSelect(this)">
+      <div class="letter">A</div>
+      <div class="content">
+        <h3>Named saved layouts</h3>
+        <p>Keep the active custom layout, plus a small library of named snapshots that can be loaded, updated, or saved as new.</p>
+      </div>
+    </div>
+    <div class="option" data-choice="simple" onclick="toggleSelect(this)">
+      <div class="letter">B</div>
+      <div class="content">
+        <h3>One custom layout only</h3>
+        <p>Improve editing controls, but treat the existing saved settings as the only persistent layout.</p>
+      </div>
+    </div>
+  </div>
+</div>

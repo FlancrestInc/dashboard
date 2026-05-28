@@ -1,0 +1,333 @@
+{% extends "base.html" %}
+{% set body_class = "admin-body" %}
+{% block body %}
+<main class="admin-shell">
+  <header class="admin-header">
+    <div>
+      <p class="kicker">Household Dashboard</p>
+      <h1>Settings</h1>
+    </div>
+    <div class="admin-actions">
+      <a href="/display" target="_blank">View display</a>
+      <form method="post" action="/admin/logout"><button class="secondary" type="submit">Log out</button></form>
+    </div>
+  </header>
+
+  {% if saved %}<p class="saved">Settings saved.</p>{% endif %}
+
+  <form class="settings-form" method="post" action="/admin">
+    <nav class="settings-tabs" aria-label="Settings sections">
+      {% for key, label in [("board","Board"),("layout","Layout"),("photos","Photos"),("camera","Camera"),("sources","Weather & Calendar")] %}
+      <button type="button" class="tab-button {% if loop.first %}active{% endif %}" data-tab="{{ key }}">{{ label }}</button>
+      {% endfor %}
+    </nav>
+
+    <section class="tab-panel active" data-tab-panel="board">
+      <h2>Board</h2>
+      <label><span>Board title</span><input name="board_title" value="{{ settings.board_title }}"></label>
+    </section>
+
+    <section class="tab-panel" data-tab-panel="layout">
+      <h2>Layout</h2>
+      <div class="form-row">
+        <label>
+          <span>Layout mode</span>
+          <select name="layout_mode" id="layoutMode">
+            <option value="preset" {% if settings.layout.mode == "preset" %}selected{% endif %}>Preset</option>
+            <option value="custom" {% if settings.layout.mode == "custom" %}selected{% endif %}>Custom</option>
+          </select>
+        </label>
+        <label>
+          <span>Layout preset</span>
+          <select name="layout_preset" id="layoutPreset">
+            {% for value, label in [("classic","Classic"),("focus","Focus"),("camera","Camera first"),("portrait","Portrait"),("photo-frame","Photo frame"),("dense","Dense")] %}
+            <option value="{{ value }}" {% if settings.layout.preset == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </label>
+      </div>
+      <div class="form-row">
+        <label>
+          <span>Display size</span>
+          <select name="layout_display_size" id="layoutDisplaySize">
+            {% for value, label in [("1920x1080","1920 x 1080"),("1080x1920","1080 x 1920"),("2560x1440","2560 x 1440"),("3840x2160","3840 x 2160"),("1280x800","1280 x 800"),("custom","Custom")] %}
+            <option value="{{ value }}" {% if settings.layout.display_size == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label>
+          <span>Orientation</span>
+          <select name="layout_orientation" id="layoutOrientation">
+            <option value="landscape" {% if settings.layout.orientation == "landscape" %}selected{% endif %}>Landscape</option>
+            <option value="portrait" {% if settings.layout.orientation == "portrait" %}selected{% endif %}>Portrait</option>
+          </select>
+        </label>
+      </div>
+      <div class="form-row">
+        <label><span>Width</span><input name="layout_width" id="layoutWidth" type="number" min="320" max="7680" value="{{ settings.layout.width }}"></label>
+        <label><span>Height</span><input name="layout_height" id="layoutHeight" type="number" min="320" max="7680" value="{{ settings.layout.height }}"></label>
+      </div>
+
+      <div class="layout-block-controls">
+        <h3>Blocks</h3>
+        <input type="hidden" id="blockInstanceIds" name="block_instance_ids" value="{{ admin_blocks | map(attribute='id') | join(',') }}">
+        <div class="checkbox-grid">
+          {% for block in admin_blocks %}
+          {% if block.type not in ["photos", "frigate"] %}
+          <label class="check">
+            <input type="hidden" name="block_{{ block.id }}_type" value="{{ block.type }}">
+            <input type="checkbox" name="block_{{ block.id }}_enabled" data-block-toggle="{{ block.id }}" {% if block.enabled %}checked{% endif %}>
+            {{ block.label }}
+          </label>
+          {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="saved-layout-controls">
+        <h3>Saved layouts</h3>
+        <textarea id="layoutSavedLayouts" name="layout_saved_layouts" hidden>{{ settings.layout.saved_layouts | tojson }}</textarea>
+        <div class="form-row">
+          <label>
+            <span>Saved layout</span>
+            <select name="layout_saved_id" id="layoutSavedId">
+              {% for saved_layout in settings.layout.saved_layouts %}
+              <option value="{{ saved_layout.id }}">{{ saved_layout.name }}</option>
+              {% endfor %}
+            </select>
+          </label>
+          <label><span>Name</span><input name="layout_saved_name" id="layoutSavedName" placeholder="Morning board"></label>
+        </div>
+        <div class="button-row">
+          <button class="secondary" type="submit" name="layout_action" value="load_saved">Load</button>
+          <button class="secondary" type="submit" name="layout_action" value="save_current">Save current</button>
+          <button class="secondary" type="submit" name="layout_action" value="save_new">Save as new</button>
+        </div>
+      </div>
+
+      <div class="builder-wrap">
+        <div class="builder-toolbar">
+          <p class="hint">Drag blocks to place them. Use the lower-right handle to resize in custom mode.</p>
+          <label class="check compact-check"><input type="checkbox" id="snapToGrid" checked> Snap to grid</label>
+          <button class="secondary" type="button" id="seedCustomLayout">Seed custom from preset</button>
+        </div>
+        <div
+          class="layout-builder"
+          id="layoutBuilder"
+          style="--builder-aspect: {{ settings.layout.width }} / {{ settings.layout.height }};"
+          data-mode="{{ settings.layout.mode }}"
+        >
+          {% for block in admin_blocks %}
+          {% set rect = settings.layout.custom_blocks.get(block.id) or settings.layout.custom_blocks.get(block.type) %}
+          <div class="builder-block {% if not block.enabled %}hidden{% endif %}" data-block="{{ block.id }}" data-block-type="{{ block.type }}" style="left: {{ rect.x }}%; top: {{ rect.y }}%; width: {{ rect.w }}%; height: {{ rect.h }}%; z-index: {{ rect.z | default(loop.index) }};">
+            <span class="block-title">{{ block.label }}</span>
+            <span class="block-dimensions" aria-live="polite"></span>
+            <label class="block-layer-control"><span>Layer</span><input data-layer-input="{{ block.id }}" name="layout_block_{{ block.id }}_z" type="number" min="1" max="999" value="{{ rect.z | default(loop.index) }}"></label>
+            <i data-resize-handle="n" aria-hidden="true"></i>
+            <i data-resize-handle="e" aria-hidden="true"></i>
+            <i data-resize-handle="s" aria-hidden="true"></i>
+            <i data-resize-handle="w" aria-hidden="true"></i>
+            <i data-resize-handle="ne" aria-hidden="true"></i>
+            <i data-resize-handle="se" aria-hidden="true"></i>
+            <i data-resize-handle="sw" aria-hidden="true"></i>
+            <i data-resize-handle="nw" aria-hidden="true"></i>
+          </div>
+          <input type="hidden" name="layout_block_{{ block.id }}_x" value="{{ rect.x }}">
+          <input type="hidden" name="layout_block_{{ block.id }}_y" value="{{ rect.y }}">
+          <input type="hidden" name="layout_block_{{ block.id }}_w" value="{{ rect.w }}">
+          <input type="hidden" name="layout_block_{{ block.id }}_h" value="{{ rect.h }}">
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="block-config-list">
+        <h3>Clock and agenda labels</h3>
+        {% for block in admin_blocks %}
+        {% if block.type in ["clock", "calendar"] %}
+        <fieldset class="block-config" data-config-block="{{ block.id }}" data-config-type="{{ block.type }}">
+          <legend>{{ block.label }}</legend>
+          <input type="hidden" name="block_{{ block.id }}_type" value="{{ block.type }}">
+          <div class="form-row">
+            <label><span>Label</span><input name="block_{{ block.id }}_label" value="{{ block.label }}"></label>
+            <label class="check"><input type="checkbox" name="block_{{ block.id }}_show_label" {% if block.show_label %}checked{% endif %}> Show label</label>
+          </div>
+        </fieldset>
+        {% endif %}
+        {% endfor %}
+      </div>
+
+    </section>
+
+    <section class="tab-panel" data-tab-panel="photos">
+      <h2>Photos</h2>
+      <label class="check"><input type="checkbox" name="photos_enabled" {% if settings.photos.enabled %}checked{% endif %}> Enabled</label>
+      <input type="hidden" id="photoBlockCount" name="photo_block_count" value="{{ photo_blocks | length }}">
+      <div class="form-row">
+        <label><span>Rotation seconds</span><input name="photos_rotation_seconds" type="number" min="10" value="{{ settings.photos.rotation_seconds }}"></label>
+        <label>
+          <span>Display mode</span>
+          <select name="photos_display_mode">
+            <option value="background" {% if settings.photos.display_mode == "background" %}selected{% endif %}>Background</option>
+            <option value="frame" {% if settings.photos.display_mode == "frame" %}selected{% endif %}>Photo frame</option>
+            <option value="both" {% if settings.photos.display_mode == "both" %}selected{% endif %}>Both</option>
+          </select>
+        </label>
+      </div>
+      <div class="form-row">
+        <label>
+          <span>Background fit</span>
+          <select name="photos_background_fit">
+            <option value="cover" {% if settings.photos.background_fit == "cover" %}selected{% endif %}>Cover</option>
+            <option value="contain" {% if settings.photos.background_fit == "contain" %}selected{% endif %}>Contain</option>
+          </select>
+        </label>
+        <label><span>Background overlay</span><input name="photos_background_overlay" type="number" min="0" max="90" value="{{ settings.photos.background_overlay }}"></label>
+      </div>
+      <div class="form-row">
+        <label>
+          <span>Frame fit</span>
+          <select name="photos_frame_fit">
+            <option value="cover" {% if settings.photos.frame_fit == "cover" %}selected{% endif %}>Cover</option>
+            <option value="contain" {% if settings.photos.frame_fit == "contain" %}selected{% endif %}>Contain</option>
+          </select>
+        </label>
+        <label class="check"><input type="checkbox" name="photos_show_captions" {% if settings.photos.show_captions %}checked{% endif %}> Show captions</label>
+      </div>
+      <div class="builder-toolbar">
+        <h3>Photo blocks</h3>
+        <button class="secondary" type="button" id="addPhotoBlock">Add photo block</button>
+      </div>
+      <div class="block-config-list" id="photoBlockConfigs" data-next-index="{{ (photo_blocks | length) + 1 }}">
+        {% for block in photo_blocks %}
+        <fieldset class="block-config" data-config-block="{{ block.id }}" data-config-type="photos">
+          <legend>{{ block.label }}</legend>
+          <button class="secondary remove-block" type="button" data-remove-block="{{ block.id }}">Remove</button>
+          <input type="hidden" name="block_{{ block.id }}_type" value="photos">
+          <div class="form-row">
+            <label><span>Label</span><input name="block_{{ block.id }}_label" value="{{ block.label }}"></label>
+            <label class="check"><input type="checkbox" name="block_{{ block.id }}_show_label" {% if block.show_label %}checked{% endif %}> Show label</label>
+            <label class="check"><input type="checkbox" name="block_{{ block.id }}_enabled" data-block-toggle="{{ block.id }}" {% if block.enabled %}checked{% endif %}> Show block</label>
+          </div>
+          <div class="form-row">
+            <label>
+              <span>Photo source</span>
+              <select name="block_{{ block.id }}_photo_source_mode">
+                <option value="folder" {% if block.settings.source_mode == "folder" %}selected{% endif %}>Folder rotation</option>
+                <option value="static" {% if block.settings.source_mode == "static" %}selected{% endif %}>Static image</option>
+              </select>
+            </label>
+            <label>
+              <span>Fit</span>
+              <select name="block_{{ block.id }}_photo_fit">
+                <option value="cover" {% if block.settings.fit == "cover" %}selected{% endif %}>Cover</option>
+                <option value="contain" {% if block.settings.fit == "contain" %}selected{% endif %}>Contain</option>
+              </select>
+            </label>
+          </div>
+          <div class="form-row">
+            <label><span>Static image path</span><input name="block_{{ block.id }}_photo_static_path" value="{{ block.settings.static_path }}" placeholder="portrait.jpg"></label>
+            <label><span>Folder path</span><input name="block_{{ block.id }}_photo_folder" value="{{ block.settings.folder }}" placeholder="album"></label>
+          </div>
+          <label class="check"><input type="checkbox" name="block_{{ block.id }}_photo_show_captions" {% if block.settings.show_captions %}checked{% endif %}> Show captions</label>
+        </fieldset>
+        {% endfor %}
+      </div>
+      <p class="hint">Mount local images into the configured photo folder. The default compose file maps <code>./photos</code> to <code>/photos</code>.</p>
+    </section>
+
+    <section class="tab-panel" data-tab-panel="camera">
+      <h2>Camera</h2>
+      <label class="check"><input type="checkbox" name="frigate_enabled" {% if settings.frigate.enabled %}checked{% endif %}> Enabled</label>
+      <label><span>Frigate base URL</span><input name="frigate_base_url" value="{{ settings.frigate.base_url }}" placeholder="http://frigate:5000"></label>
+      <label><span>Snapshot refresh seconds</span><input name="frigate_snapshot_refresh_seconds" type="number" min="5" value="{{ settings.frigate.snapshot_refresh_seconds }}"></label>
+      <input type="hidden" id="cameraBlockCount" name="camera_block_count" value="{{ camera_blocks | length }}">
+      <div class="builder-toolbar">
+        <h3>Camera blocks</h3>
+        <button class="secondary" type="button" id="addCameraBlock">Add camera block</button>
+      </div>
+      <div class="block-config-list" id="cameraBlockConfigs" data-next-index="{{ (camera_blocks | length) + 1 }}">
+        {% for block in camera_blocks %}
+        <fieldset class="block-config" data-config-block="{{ block.id }}" data-config-type="frigate">
+          <legend>{{ block.label }}</legend>
+          <button class="secondary remove-block" type="button" data-remove-block="{{ block.id }}">Remove</button>
+          <input type="hidden" name="block_{{ block.id }}_type" value="frigate">
+          <div class="form-row">
+            <label><span>Label</span><input name="block_{{ block.id }}_label" value="{{ block.label }}"></label>
+            <label class="check"><input type="checkbox" name="block_{{ block.id }}_show_label" {% if block.show_label %}checked{% endif %}> Show label</label>
+            <label class="check"><input type="checkbox" name="block_{{ block.id }}_enabled" data-block-toggle="{{ block.id }}" {% if block.enabled %}checked{% endif %}> Show block</label>
+          </div>
+          <div class="form-row">
+            <label><span>Camera name</span><input name="block_{{ block.id }}_camera_name" value="{{ block.settings.camera_name }}" placeholder="front_door"></label>
+            <label>
+              <span>Display mode</span>
+              <select name="block_{{ block.id }}_display_mode">
+                <option value="snapshot" {% if block.settings.display_mode == "snapshot" %}selected{% endif %}>Snapshot</option>
+                <option value="live" {% if block.settings.display_mode == "live" %}selected{% endif %}>Live</option>
+              </select>
+            </label>
+          </div>
+          <label><span>Live URL</span><input name="block_{{ block.id }}_live_url" value="{{ block.settings.live_url }}" placeholder="Browser-playable go2rtc/MSE/WebRTC URL"></label>
+        </fieldset>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="tab-panel" data-tab-panel="sources">
+      <h2>Weather</h2>
+      {% set weather_block = (admin_blocks | selectattr("type", "equalto", "weather") | list | first) %}
+      <label class="check"><input type="checkbox" name="weather_enabled" {% if settings.weather.enabled %}checked{% endif %}> Enabled</label>
+      <label><span>Label</span><input name="weather_label" value="{{ settings.weather.label }}"></label>
+      {% if weather_block %}
+      <input type="hidden" name="block_{{ weather_block.id }}_type" value="weather">
+      <div class="form-row">
+        <label><span>Block label</span><input name="block_{{ weather_block.id }}_label" value="{{ weather_block.label }}"></label>
+        <label class="check"><input type="checkbox" name="block_{{ weather_block.id }}_show_label" {% if weather_block.show_label %}checked{% endif %}> Show block label</label>
+      </div>
+      {% endif %}
+      <div class="form-row">
+        <label><span>Latitude</span><input name="weather_latitude" value="{{ settings.weather.latitude }}" placeholder="39.7392"></label>
+        <label><span>Longitude</span><input name="weather_longitude" value="{{ settings.weather.longitude }}" placeholder="-104.9903"></label>
+      </div>
+      <label>
+        <span>Temperature unit</span>
+        <select name="weather_temperature_unit">
+          <option value="fahrenheit" {% if settings.weather.temperature_unit == "fahrenheit" %}selected{% endif %}>Fahrenheit</option>
+          <option value="celsius" {% if settings.weather.temperature_unit == "celsius" %}selected{% endif %}>Celsius</option>
+        </select>
+      </label>
+      <div class="form-row">
+        <label><span>Default forecast days</span><input name="weather_forecast_days" type="number" min="1" max="7" value="{{ settings.weather.forecast_days }}"></label>
+        <label class="check"><input type="checkbox" name="weather_show_icons" {% if settings.weather.show_icons %}checked{% endif %}> Show icons by default</label>
+      </div>
+      {% if weather_block %}
+      <div class="form-row">
+        <label><span>Block forecast days</span><input name="block_{{ weather_block.id }}_forecast_days" type="number" min="1" max="7" value="{{ weather_block.settings.forecast_days }}"></label>
+        <label class="check"><input type="checkbox" name="block_{{ weather_block.id }}_show_icons" {% if weather_block.settings.show_icons %}checked{% endif %}> Show weather icons</label>
+      </div>
+      {% endif %}
+
+      <h2>Calendar</h2>
+      <label class="check"><input type="checkbox" name="calendar_enabled" {% if settings.calendar.enabled %}checked{% endif %}> Enabled</label>
+      <label><span>ICS feed URL</span><input name="calendar_ics_url" value="{{ settings.calendar.ics_url }}" placeholder="https://.../calendar.ics"></label>
+      <div class="form-row">
+        <label><span>Max events</span><input name="calendar_max_events" type="number" min="1" max="20" value="{{ settings.calendar.max_events }}"></label>
+        <label><span>Timezone</span><input name="calendar_timezone" value="{{ settings.calendar.timezone }}" placeholder="America/Denver"></label>
+      </div>
+
+    </section>
+
+    <button class="save" type="submit">Save Settings</button>
+  </form>
+</main>
+{% endblock %}
+{% block scripts %}
+<script id="layoutPresetData" type="application/json">{{ {
+  "classic": {"clock": {"x": 4, "y": 5, "w": 48, "h": 22}, "weather": {"x": 72, "y": 5, "w": 24, "h": 22}, "calendar": {"x": 4, "y": 34, "w": 42, "h": 58}, "frigate": {"x": 49, "y": 34, "w": 47, "h": 58}, "photos": {"x": 49, "y": 34, "w": 47, "h": 58}},
+  "focus": {"clock": {"x": 4, "y": 5, "w": 38, "h": 20}, "weather": {"x": 73, "y": 5, "w": 23, "h": 20}, "calendar": {"x": 4, "y": 30, "w": 55, "h": 63}, "frigate": {"x": 62, "y": 30, "w": 34, "h": 63}, "photos": {"x": 62, "y": 30, "w": 34, "h": 63}},
+  "camera": {"clock": {"x": 4, "y": 5, "w": 34, "h": 20}, "weather": {"x": 4, "y": 29, "w": 25, "h": 24}, "calendar": {"x": 4, "y": 57, "w": 25, "h": 36}, "frigate": {"x": 33, "y": 5, "w": 63, "h": 88}, "photos": {"x": 33, "y": 5, "w": 63, "h": 88}},
+  "portrait": {"clock": {"x": 6, "y": 3, "w": 88, "h": 15}, "weather": {"x": 6, "y": 20, "w": 88, "h": 16}, "calendar": {"x": 6, "y": 38, "w": 88, "h": 31}, "frigate": {"x": 6, "y": 71, "w": 88, "h": 26}, "photos": {"x": 6, "y": 71, "w": 88, "h": 26}},
+  "photo-frame": {"clock": {"x": 4, "y": 5, "w": 34, "h": 20}, "weather": {"x": 4, "y": 29, "w": 34, "h": 22}, "calendar": {"x": 4, "y": 55, "w": 34, "h": 38}, "photos": {"x": 42, "y": 5, "w": 54, "h": 88}, "frigate": {"x": 42, "y": 5, "w": 54, "h": 88}},
+  "dense": {"clock": {"x": 3, "y": 4, "w": 30, "h": 20}, "weather": {"x": 35, "y": 4, "w": 28, "h": 20}, "photos": {"x": 65, "y": 4, "w": 32, "h": 20}, "calendar": {"x": 3, "y": 28, "w": 46, "h": 68}, "frigate": {"x": 51, "y": 28, "w": 46, "h": 68}}
+} | tojson }}</script>
+<script src="/static/admin.js"></script>
+{% endblock %}

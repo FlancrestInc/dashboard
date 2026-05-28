@@ -1,0 +1,71 @@
+<h2>Dashboard Layout Direction</h2>
+<p class="subtitle">Recommended structure for fullscreen displays: fast presets plus a real custom canvas for portrait and landscape.</p>
+
+<div class="cards">
+  <div class="card" data-choice="presets-plus-builder" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="display:grid;gap:12px;padding:14px;background:#101820;color:#f5f1e8;border-radius:10px;min-height:250px">
+        <div style="display:grid;grid-template-columns:1.3fr .7fr;gap:10px;height:78px">
+          <div style="border:1px solid #6f7f85;border-radius:6px;padding:8px">
+            <div style="font-size:28px;font-weight:800">7:42</div>
+            <div style="font-size:11px;color:#d5c796">Kitchen Dashboard</div>
+          </div>
+          <div style="border:1px solid #6f7f85;border-radius:6px;padding:8px">Weather</div>
+        </div>
+        <div style="display:grid;grid-template-columns:.9fr 1.1fr;gap:10px;min-height:130px">
+          <div style="border:1px solid #6f7f85;border-radius:6px;padding:8px">Agenda</div>
+          <div style="border:1px solid #6f7f85;border-radius:6px;padding:8px">Camera</div>
+        </div>
+        <div style="font-size:12px;color:#d5c796">Preset: Classic Landscape, 1920 x 1080</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Presets Plus Visual Builder</h3>
+      <p>Ship several tuned layouts, then let custom mode position and size blocks on a scaled display canvas.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="portrait-aware" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="display:grid;grid-template-columns:150px 1fr;gap:18px;align-items:center">
+        <div style="display:grid;gap:8px;padding:12px;background:#101820;color:#f5f1e8;border-radius:10px;height:260px">
+          <div style="border:1px solid #6f7f85;border-radius:6px;padding:7px">
+            <div style="font-size:24px;font-weight:800">7:42</div>
+          </div>
+          <div style="border:1px solid #6f7f85;border-radius:6px;padding:7px">Weather</div>
+          <div style="border:1px solid #6f7f85;border-radius:6px;padding:7px;min-height:72px">Agenda</div>
+          <div style="border:1px solid #6f7f85;border-radius:6px;padding:7px">Photo Frame</div>
+        </div>
+        <div>
+          <div class="label">Portrait canvas</div>
+          <p>Same blocks, different preset geometry. Custom layouts save against display width, height, and orientation.</p>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Display-Size Aware</h3>
+      <p>Target 1920 x 1080 fullscreen by default, with common 1080p portrait, 1440p, 4K, tablet, and custom dimensions.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="photo-controls" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="display:grid;gap:10px">
+        <div style="height:132px;border-radius:10px;background:linear-gradient(135deg,#283b3f,#c8a35d);display:grid;place-items:center;color:#fff;font-weight:800">Background Photo</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div style="border:1px solid #d4c8a8;border-radius:8px;padding:12px;min-height:84px">Fit: Cover<br>Overlay: 55%</div>
+          <div style="border:1px solid #d4c8a8;border-radius:8px;padding:12px;min-height:84px">Photo Frame<br>Fit: Contain</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Photo as Background or Block</h3>
+      <p>Photo settings cover source visibility, rotation, background treatment, and a draggable photo-frame block.</p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Settings Tabs</h3>
+  <p>Board, Layout, Photos, Data Sources, and Blocks tabs keep the admin page from turning into one long scroll.</p>
+</div>

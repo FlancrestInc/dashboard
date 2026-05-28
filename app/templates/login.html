@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% set body_class = "admin-body" %}
+{% block body %}
+<main class="login-shell">
+  <form class="login-panel" method="post" action="/admin/login">
+    <p class="kicker">Dashboard Admin</p>
+    <h1>Sign in</h1>
+    {% if error %}<p class="form-error">{{ error }}</p>{% endif %}
+    <label>
+      <span>Password</span>
+      <input name="password" type="password" autocomplete="current-password" required autofocus>
+    </label>
+    <button type="submit">Open Admin</button>
+  </form>
+</main>
+{% endblock %}

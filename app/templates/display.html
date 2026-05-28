@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% set body_class = "display-body layout-" ~ layout.preset ~ " orientation-" ~ layout.orientation %}
+{% block body %}
+<main class="display-shell" data-photo-rotation="{{ photos.rotation_seconds }}" style="--display-aspect: {{ layout.width }} / {{ layout.height }};">
+  <div class="background-layer" id="backgroundLayer"></div>
+  <section class="layout-stage" aria-label="Dashboard layout">
+    {% for block in layout.blocks %}
+      {% if block.type == "clock" %}
+      <section class="layout-block clock-panel" data-block="clock" data-block-id="{{ block.id }}" style="{{ block.style }}">
+        {% if block.show_label %}<p class="kicker block-label">{{ block.label }}</p>{% endif %}
+        <h1 class="clock-time" data-clock>--:--</h1>
+        <p class="date-line" data-date-line></p>
+      </section>
+      {% elif block.type == "weather" %}
+      <aside class="layout-block weather-block" data-block="weather" data-block-id="{{ block.id }}" style="{{ block.style }}"></aside>
+      {% elif block.type == "calendar" %}
+      <article class="layout-block panel agenda-panel" data-block="calendar" data-block-id="{{ block.id }}" style="{{ block.style }}">
+        {% if block.show_label %}<h2>{{ block.label }}</h2>{% endif %}
+        <div data-agenda-block></div>
+      </article>
+      {% elif block.type == "frigate" %}
+      <article class="layout-block panel camera-panel" data-block="frigate" data-block-id="{{ block.id }}" style="{{ block.style }}">
+        {% if block.show_label %}<h2>{{ block.label }}</h2>{% endif %}
+        <div data-camera-block></div>
+      </article>
+      {% elif block.type == "photos" %}
+      <article class="layout-block panel photo-panel" data-block="photos" data-block-id="{{ block.id }}" style="{{ block.style }}">
+        {% if block.show_label %}<h2>{{ block.label }}</h2>{% endif %}
+        <div data-photo-frame-block></div>
+      </article>
+      {% endif %}
+    {% endfor %}
+  </section>
+</main>
+<script id="initialData" type="application/json">{{ {"settings": settings, "layout": layout, "calendar": calendar, "weather": weather, "photos": photos, "frigate": frigate} | tojson }}</script>
+<script src="/static/display.js"></script>
+{% endblock %}
