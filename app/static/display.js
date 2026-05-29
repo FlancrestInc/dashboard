@@ -146,12 +146,31 @@ function renderCameraBlocks(frigate) {
       return;
     }
     if (camera.mode === "live") {
-      cameraBlock.innerHTML = `<iframe title="Live camera" src="${escapeAttribute(camera.live_url)}" loading="lazy"></iframe>`;
+      cameraBlock.innerHTML = `<div class="camera-live-viewport"><img class="camera-live-image" alt="Live camera" src="${escapeAttribute(
+        camera.live_url,
+      )}" loading="lazy"><iframe class="camera-live-frame" title="Live camera" data-live-frame data-live-src="${escapeAttribute(
+        camera.live_url,
+      )}" loading="lazy" scrolling="no" hidden></iframe></div>`;
+      attachLiveCameraFallbacks();
       return;
     }
     cameraBlock.innerHTML = `<img data-snapshot-image data-snapshot-url="${escapeAttribute(
       camera.snapshot_url,
     )}" alt="Camera snapshot" src="${escapeAttribute(camera.snapshot_url)}&t=${Date.now()}">`;
+  });
+}
+
+function attachLiveCameraFallbacks() {
+  document.querySelectorAll(".camera-live-image").forEach((image) => {
+    if (image.dataset.fallbackAttached) return;
+    image.dataset.fallbackAttached = "true";
+    image.addEventListener("error", () => {
+      const frame = image.parentElement ? image.parentElement.querySelector("[data-live-frame]") : null;
+      if (!frame) return;
+      image.hidden = true;
+      frame.hidden = false;
+      if (!frame.src && frame.dataset.liveSrc) frame.src = frame.dataset.liveSrc;
+    });
   });
 }
 

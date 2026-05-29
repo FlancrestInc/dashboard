@@ -85,3 +85,16 @@ def test_weather_icons_use_unambiguous_weather_symbols():
     assert '"cloud-drizzle": "🌦️"' in script
     assert '"cloud-rain": "🌧️"' in script
     assert '"cloud-fog": "🌫️"' in script
+
+
+def test_live_camera_prefers_contained_image_stream_with_iframe_fallback():
+    script = Path("app/static/display.js").read_text()
+
+    assert 'class="camera-live-viewport"' in script
+    assert 'class="camera-live-image"' in script
+    assert 'data-live-frame' in script
+    assert 'data-live-src' in script
+    assert 'scrolling="no"' in script
+    assert "function attachLiveCameraFallbacks()" in script
+    assert "LIVE_CAMERA_BASE_WIDTH" not in script
+    assert "scale = Math.min(" not in script

@@ -23,10 +23,23 @@ def test_camera_panels_use_minimal_bezels_and_labels():
     styles = Path("app/static/styles.css").read_text()
 
     assert ".camera-panel {" in styles
-    assert "padding: clamp(4px, min(1.2cqw, 1.4cqh), 10px);" in styles
+    assert "padding: 0;" in styles
     assert ".camera-panel h2" in styles
     assert "margin: 0 0 clamp(4px, 0.9cqh, 8px);" in styles
     assert "font-size: clamp(0.62rem, min(2.8cqw, 2.6cqh), 0.82rem);" in styles
+
+
+def test_live_camera_viewport_clips_and_scales_embedded_feed():
+    styles = Path("app/static/styles.css").read_text()
+
+    assert ".camera-live-viewport {" in styles
+    assert "overflow: hidden;" in styles
+    assert ".camera-live-image," in styles
+    assert ".camera-live-frame {" in styles
+    assert "object-fit: contain;" in styles
+    assert "pointer-events: none;" in styles
+    assert "width: 1920px;" not in styles
+    assert "height: 1080px;" not in styles
 
 
 def test_builder_block_dimension_badge_stays_clear_of_layer_picker():
